@@ -1,42 +1,49 @@
-name: Android Build
+name: Android CI/CD for BookingApp
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  build:
+  build-android:
+    name: Build Android APK
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Set up Java
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js with caching
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+          cache-dependency-path: './BookingApp/yarn.lock'
+
+      - name: Install Yarn dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: ./BookingApp
+
+      - name: Setup Java JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Fix Gradle permissions
+      - name: Grant executable permission to gradlew
         run: chmod +x android/gradlew
+        working-directory: ./BookingApp
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build Android Release
+      - name: Build Release APK
         run: |
           cd android
           ./gradlew assembleRelease
+        working-directory: ./BookingApp
 
-      - name: Upload APK
+      - name: Upload Android Release APK
         uses: actions/upload-artifact@v4
         with:
           name: BookingApp-release.apk
-          path: android/app/build/outputs/apk/release/*.apk
+          path: BookingApp/android/app/build/outputs/apk/release/*.apk
 
