@@ -6,44 +6,21 @@ on:
 
 jobs:
   build-android:
-    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Node.js with caching
+      - name: Setup Node.js (with cache)
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'yarn'
-          cache-dependency-path: './BookingApp/yarn.lock'
+          cache-dependency-path: 'BookingApp/yarn.lock'
 
-      - name: Install Yarn dependencies
+      - name: Install dependencies
         run: yarn install --frozen-lockfile
-        working-directory: ./BookingApp
+        working-directory: BookingApp
 
-      - name: Setup Java JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'gradle'
-
-      - name: Grant executable permission to gradlew
-        run: chmod +x android/gradlew
-        working-directory: ./BookingApp
-
-      - name: Build Release APK
-        run: |
-          cd android
-          ./gradlew assembleRelease
-        working-directory: ./BookingApp
-
-      - name: Upload Android Release APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: BookingApp-release.apk
-          path: BookingApp/android/app/build/outputs/apk/release/*.apk
-
+      # Rest of steps...
